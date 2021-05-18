@@ -656,16 +656,19 @@ public class ExtensionLoader<T> {
             throw findException(name);
         }
         try {
+            // 根据扩展实现类从 EXTENSION_INSTANCES 缓存中查找相应的实例。
             T instance = (T) EXTENSION_INSTANCES.get(clazz);
             if (instance == null) {
+                // 如果查找失败，会通过反射创建扩展实现对象。
                 EXTENSION_INSTANCES.putIfAbsent(clazz, clazz.newInstance());
                 instance = (T) EXTENSION_INSTANCES.get(clazz);
             }
+            // 自动装配扩展实现对象中的属性（即调用其 setter）
             injectExtension(instance);
 
 
             if (wrap) {
-
+                // 自动包装扩展实现对象。
                 List<Class<?>> wrapperClassesList = new ArrayList<>();
                 if (cachedWrapperClasses != null) {
                     wrapperClassesList.addAll(cachedWrapperClasses);
@@ -683,7 +686,7 @@ public class ExtensionLoader<T> {
                     }
                 }
             }
-
+            // 如果扩展实现类实现了 Lifecycle 接口，在 initExtension() 方法中会调用 initialize() 方法进行初始化。
             initExtension(instance);
             return instance;
         } catch (Throwable t) {
